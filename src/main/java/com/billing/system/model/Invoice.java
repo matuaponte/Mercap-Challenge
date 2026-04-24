@@ -23,22 +23,34 @@ public class Invoice {
     }
 
     public Double totalCost(){
-        return callDetails.stream().filter(c -> this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum() + basicFee;
+        return callDetails.stream()
+            .filter(this::checkMonthYear)
+            .mapToDouble(Call::calculateCost)
+            .sum() + basicFee;
     }
 
     private Double localCost(){
-        return callDetails.stream().filter(c -> c instanceof LocalCall && this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum();
+        return callDetails.stream()
+            .filter(c -> c instanceof LocalCall && this.checkMonthYear(c))
+            .mapToDouble(Call::calculateCost)
+            .sum();
     }
 
     private Double internationalCost(){
-        return callDetails.stream().filter(c -> c instanceof InternationalCall && this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum();
+        return callDetails.stream()
+            .filter(c -> c instanceof InternationalCall && this.checkMonthYear(c))
+            .mapToDouble(Call::calculateCost)
+            .sum();
     }
 
     private Double nationalCost(){
-        return callDetails.stream().filter(c -> c instanceof NationalCall && this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum();
+        return callDetails.stream()
+            .filter(c -> c instanceof NationalCall && this.checkMonthYear(c))
+            .mapToDouble(Call::calculateCost)
+            .sum();
     }
 
-    private Boolean checkMonthYear(Call c){
+    private boolean checkMonthYear(Call c){
         return c.getDateTime().getMonth() == period.getMonth() && c.getDateTime().getYear() == period.getYear();
     }
 
@@ -47,7 +59,7 @@ public class Invoice {
         Double localCallAmount = this.localCost();
         Double nationalCallAmount = this.nationalCost();
         Double internationalCallAmount = this.internationalCost();
-        String month = period.toString();
+        String month = period.getMonth().toString();
 
         StringBuilder sb = new StringBuilder();
 

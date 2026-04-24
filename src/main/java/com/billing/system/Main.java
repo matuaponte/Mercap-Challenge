@@ -50,7 +50,7 @@ public class Main {
         Invoice invoiceApril = new Invoice(LocalDate.of(2026, Month.APRIL, 1), calls, 100.0, customer);
         System.out.println(invoiceApril.printInvoice());
 
-        Invoice invoiceMay = new Invoice(LocalDate.of(2026, Month.MAY, 1), calls, 100.0, customer);
+        Invoice invoiceMay = new Invoice(LocalDate.of(2026, Month.MARCH, 1), calls, 100.0, customer);
         System.out.println(invoiceMay.printInvoice());
 
         Invoice invoiceJune = new Invoice(LocalDate.of(2026, Month.JUNE, 1), calls, 100.0, customer);
