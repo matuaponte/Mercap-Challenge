@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class LocalCall extends  Call {
-    TimeSlot peakTime;
-    Double offPeakPrice;
-    Double weekendPrice;
+    private TimeSlot peakTime;
+    private Double offPeakPrice;
+    private Double weekendPrice;
 
     public LocalCall(LocalDateTime dateTime, Integer minutes, TimeSlot peakTime, Double offPeakPrice, Double weekendPrice) {
         super(dateTime, minutes);
@@ -17,25 +17,51 @@ public class LocalCall extends  Call {
     }
 
     @Override
-    Double calculateCost() {
+    public Double calculateCost() {
         if(isWeekend()){
-            return minutes * weekendPrice;
+            return getMinutes() * weekendPrice;
         }
         else if(isPeakTime()){
-            return minutes * peakTime.pricePerMinute;
+            return getMinutes() * peakTime.getPricePerMinute();
         }
-        return offPeakPrice * minutes;
+        return offPeakPrice * getMinutes();
     }
 
     private Boolean isWeekend(){
-        return switch (dateTime.getDayOfWeek()){
+        return switch ( getDateTime().getDayOfWeek()){
             case SATURDAY, SUNDAY -> true;
             default ->  false;
         };
     }
 
     private Boolean isPeakTime(){
-        LocalTime time = dateTime.toLocalTime();
-        return  !time.isBefore(peakTime.since) && !time.isAfter(peakTime.until);
+        LocalTime time =  getDateTime().toLocalTime();
+        return  !time.isBefore(peakTime.getSince()) && !time.isAfter(peakTime.getUntil());
+    }
+
+    //Getters and Setters
+
+    public TimeSlot getPeakTime() {
+        return peakTime;
+    }
+
+    public Double getOffPeakPrice() {
+        return offPeakPrice;
+    }
+
+    public Double getWeekendPrice() {
+        return weekendPrice;
+    }
+
+    public void setPeakTime(TimeSlot peakTime) {
+        this.peakTime = peakTime;
+    }
+
+    public void setOffPeakPrice(Double offPeakPrice) {
+        this.offPeakPrice = offPeakPrice;
+    }
+
+    public void setWeekendPrice(Double weekendPrice) {
+        this.weekendPrice = weekendPrice;
     }
 }
