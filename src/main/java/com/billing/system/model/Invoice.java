@@ -2,18 +2,19 @@ package com.billing.system.model;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 
 public class Invoice {
     private Customer customer;
     private LocalDate generationDate;
-    private Month period;
+    private LocalDate period;
     private List<Call> callDetails;
     private Double basicFee;
     private Double totalAmount;
 
-    public Invoice(Month period, List<Call> callDetails, Double basicFee, Customer customer) {
+    public Invoice(LocalDate period, List<Call> callDetails, Double basicFee, Customer customer) {
         this.generationDate = LocalDate.now();
         this.period = period;
         this.callDetails = callDetails;
@@ -22,19 +23,23 @@ public class Invoice {
     }
 
     public Double totalCost(){
-        return callDetails.stream().filter(c -> c.getDateTime().getMonth() == period).mapToDouble(c -> c.calculateCost()).sum() + basicFee;
+        return callDetails.stream().filter(c -> this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum() + basicFee;
     }
 
     private Double localCost(){
-        return callDetails.stream().filter(c -> c instanceof LocalCall && c.getDateTime().getMonth() == period).mapToDouble(c -> c.calculateCost()).sum();
+        return callDetails.stream().filter(c -> c instanceof LocalCall && this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum();
     }
 
     private Double internationalCost(){
-        return callDetails.stream().filter(c -> c instanceof InternationalCall && c.getDateTime().getMonth() == period).mapToDouble(c -> c.calculateCost()).sum();
+        return callDetails.stream().filter(c -> c instanceof InternationalCall && this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum();
     }
 
     private Double nationalCost(){
-        return callDetails.stream().filter(c -> c instanceof NationalCall && c.getDateTime().getMonth() == period).mapToDouble(c -> c.calculateCost()).sum();
+        return callDetails.stream().filter(c -> c instanceof NationalCall && this.checkMonthYear(c)).mapToDouble(c -> c.calculateCost()).sum();
+    }
+
+    private Boolean checkMonthYear(Call c){
+        return c.getDateTime().getMonth() == period.getMonth() && c.getDateTime().getYear() == period.getYear();
     }
 
     public String printInvoice(){
@@ -77,7 +82,7 @@ public class Invoice {
         return customer;
     }
 
-    public Month getPeriod() {
+    public LocalDate getPeriod() {
         return period;
     }
 
@@ -101,7 +106,7 @@ public class Invoice {
         this.generationDate = generationDate;
     }
 
-    public void setPeriod(Month period) {
+    public void setPeriod(LocalDate period) {
         this.period = period;
     }
 

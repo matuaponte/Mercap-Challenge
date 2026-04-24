@@ -1,18 +1,19 @@
+package com.billing.system.model;
 
-import com.billing.system.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Assertions;
 
-public class Test {
+
+public class BillingSystemTest {
 
     private TimeSlot peakTime;
     private Customer customer;
@@ -26,70 +27,75 @@ public class Test {
 
     @Test
     public void testLocalCallPeakTime() {
-        // Lunes 15 de mayo de 2023 a las 10:00 (Día de semana, horario pico)
-        LocalDateTime dateTime = LocalDateTime.of(2023, Month.MAY, 15, 10, 0);
+        // (Día de semana, horario pico)
+        LocalDateTime dateTime = LocalDateTime.of(2026, Month.MAY, 15, 10, 0);
         LocalCall call = new LocalCall(dateTime, 10, peakTime, 0.10, 0.10);
 
-        // 10 minutos * 0.20 = 2.0
-        assertEquals(2.0, call.calculateCost(), 0.001);
+        Assertions.assertEquals(2.0, call.calculateCost(), 0.001);
     }
 
     @Test
     public void testLocalCallOffPeakTime() {
-        // Lunes 15 de mayo de 2023 a las 06:00 (Día de semana, fuera de horario)
-        LocalDateTime dateTime = LocalDateTime.of(2023, Month.MAY, 15, 6, 0);
+        //(Día de semana, fuera de horario)
+        LocalDateTime dateTime = LocalDateTime.of(2026, Month.MAY, 15, 6, 0);
         LocalCall call = new LocalCall(dateTime, 10, peakTime, 0.10, 0.10);
 
-        // 10 minutos * 0.10 = 1.0
-        assertEquals(1.0, call.calculateCost(), 0.001);
+        Assertions.assertEquals(1.0, call.calculateCost(), 0.001);
+    }
+
+    @Test
+    public void testLocalCallOffPeakTimeWeekend() {
+        //(Fin de semana, dentro de horario)
+        LocalDateTime dateTime = LocalDateTime.of(2026, Month.APRIL, 19, 8, 0);
+        LocalCall call = new LocalCall(dateTime, 10, peakTime, 0.10, 0.10);
+
+        Assertions.assertEquals(1.0, call.calculateCost(), 0.001);
     }
 
     @Test
     public void testLocalCallWeekend() {
-        // Sábado 20 de mayo de 2023 a las 15:00 (Fin de semana)
-        LocalDateTime dateTime = LocalDateTime.of(2023, Month.MAY, 20, 15, 0);
+        //(Fin de semana, fuera de horario) Sábado 16 de mayo de 2026
+        LocalDateTime dateTime = LocalDateTime.of(2026, Month.MAY, 16, 20, 1);
         LocalCall call = new LocalCall(dateTime, 10, peakTime, 0.10, 0.10);
 
-        // 10 minutos * 0.10 = 1.0
-        assertEquals(1.0, call.calculateCost(), 0.001);
+        Assertions.assertEquals(1.0, call.calculateCost(), 0.001);
     }
 
     @Test
     public void testNationalCall() {
-        LocalDateTime dateTime = LocalDateTime.of(2023, Month.MAY, 15, 10, 0);
+        LocalDateTime dateTime = LocalDateTime.of(2026, Month.MAY, 15, 10, 0);
         Destination buenosAires = new Destination("Buenos Aires", 0.50);
         NationalCall call = new NationalCall(dateTime, 10, buenosAires);
 
-        // 10 minutos * 0.50 = 5.0
-        assertEquals(5.0, call.calculateCost(), 0.001);
+        Assertions.assertEquals(5.0, call.calculateCost(), 0.001);
     }
 
     @Test
     public void testInternationalCall() {
-        LocalDateTime dateTime = LocalDateTime.of(2023, Month.MAY, 15, 10, 0);
+        LocalDateTime dateTime = LocalDateTime.of(2026, Month.MAY, 15, 10, 0);
         Destination usa = new Destination("USA", 1.50);
         InternationalCall call = new InternationalCall(dateTime, 10, usa);
 
-        // 10 minutos * 1.50 = 15.0
-        assertEquals(15.0, call.calculateCost(), 0.001);
+        Assertions.assertEquals(15.0, call.calculateCost(), 0.001);
     }
 
     @Test
-    public void testInvoiceTotalCalculation() {
-        LocalDateTime peakDate = LocalDateTime.of(2023, Month.MAY, 15, 10, 0); // 10 min = $2.0 (Local)
-        LocalDateTime weekendDate = LocalDateTime.of(2023, Month.MAY, 20, 15, 0); // 10 min = $1.0 (Local)
-        Destination madrid = new Destination("Madrid", 2.0); // 5 min = $10.0 (Internacional)
+    public void testInvoiceCountsOnlyCallsInInvoiceMonth() {
+        LocalDateTime mayDate = LocalDateTime.of(2026, Month.MAY, 15, 10, 0);
+        LocalDateTime juneDate = LocalDateTime.of(2026, Month.JUNE, 1, 10, 0);
+
+        Destination madrid = new Destination("Madrid", 2.0);
 
         List<Call> calls = new ArrayList<>();
-        calls.add(new LocalCall(peakDate, 10, peakTime, 0.10, 0.10));
-        calls.add(new LocalCall(weekendDate, 10, peakTime, 0.10, 0.10));
-        calls.add(new InternationalCall(peakDate, 5, madrid));
+        calls.add(new LocalCall(mayDate, 10, peakTime, 0.10, 0.10)); // esperado 2.0
+        calls.add(new InternationalCall(mayDate, 5, madrid)); // esperado 10.0
+        calls.add(new LocalCall(juneDate, 10, peakTime, 0.10, 0.10)); // esperado 2.0
 
-        // Abono básico: $100.0
-        Invoice invoice = new Invoice(Month.MAY, calls, 100.0, customer);
+        Invoice invoiceMay = new Invoice(LocalDate.of(2026, Month.MAY, 1), calls, 100.0, customer);
+        Assertions.assertEquals(112.0, invoiceMay.totalCost(), 0.001);
 
-        // Total = 100.0 (abono) + 2.0 + 1.0 + 10.0 = 113.0
-        assertEquals(113.0, invoice.totalCost(), 0.001);
+        Invoice invoiceJune = new Invoice(LocalDate.of(2026, Month.JUNE, 1), calls, 100.0, customer);
+        Assertions.assertEquals(102.0, invoiceJune.totalCost(), 0.001);
     }
 }
 

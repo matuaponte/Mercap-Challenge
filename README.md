@@ -14,3 +14,7 @@ Los sábados y domingos cuesta 0,10 centavos el minuto
 1) No es necesario realizar una interfaz de usuario visual.
 2) No es necesario realizar persistencia de los datos (o sea, conexión a base de datos,archivos, etc.). Alcanza con simular los datos creándolos en memoria
 3) Como salida alcanza ver por pantalla como sería una factura (sin preocuparse pordarle un formato especial)
+
+
+## Diagrama de clases UML
+![Diagramas de clases.jpeg](docs/Diagramas%20de%20clases.jpeg)
