@@ -16,5 +16,14 @@ Los sábados y domingos cuesta 0,10 centavos el minuto
 3) Como salida alcanza ver por pantalla como sería una factura (sin preocuparse pordarle un formato especial)
 
 
+# Implementacion de solucion
+
 ## Diagrama de clases UML
 ![Diagramas de clases.jpeg](docs/Diagramas%20de%20clases.jpeg)
+
+## Aclaraciones - Decisiones de Diseño
+Se priorizo la legibilidad, escalabilidad y buenas prácticas:
+- Se implemento una clase Destination para tener consistencia de datos, evitar if innecesarios y ademas abstraer el precio del minuto segun cada destino (Nacional o Internacional).
+- Se aplico el principio Open/Closed Principle de los principios SOLID a la hora de crear la clase abstracta Call, donde la clase Invoince solo conoce a la clase Call y no como calcula su costo.
+- Se implemento una clase TimeSlot, que es un value object, centralizando el concepto de rango horario pico y cuanto sale su minuto.
+- Se podria haber implementado un service y varios repository para generar una arquitectura mas robusta y que sea el service el encargado de instanciar la clase Invoice y devolverla.
